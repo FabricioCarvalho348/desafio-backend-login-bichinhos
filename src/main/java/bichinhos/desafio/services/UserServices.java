@@ -21,7 +21,7 @@ public class UserServices {
     @Transactional
     public UserOutputDTO create(UserDTO dto){
         User user = new User(dto);   
-
+        
         User userCreated = repository.save(user);
 
 
@@ -37,7 +37,7 @@ public class UserServices {
         return null;
 
     }
-    public List<UserOutputDTO> list(Long id){
+    public List<UserOutputDTO> list(){
         List<User> list = repository.findAll();
         
         return list.stream().map(user -> new UserOutputDTO(user.getId(), user.getName(), user.getEmail())).toList();
