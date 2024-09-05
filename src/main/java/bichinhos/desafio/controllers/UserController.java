@@ -1,10 +1,16 @@
 package bichinhos.desafio.controllers;
 
+import bichinhos.desafio.DTOS.*;
+import bichinhos.desafio.models.User;
+import bichinhos.desafio.repositories.UserRepository;
+import bichinhos.desafio.services.TokenService;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import bichinhos.desafio.DTOS.UserDTO;
-import bichinhos.desafio.DTOS.UserOutputDTO;
 import bichinhos.desafio.services.UserServices;
 
 import java.util.List;
@@ -29,6 +35,42 @@ public class UserController {
     @Autowired
     UserServices service;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private UserRepository repository;
+
+    @Autowired
+    private TokenService tokenService;
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody AuthenticationDTO dto){
+        try{
+            var usernamePassword = new UsernamePasswordAuthenticationToken(dto.email(), dto.password());
+            var auth = this.authenticationManager.authenticate(usernamePassword);
+
+            var token = tokenService.generatedToken((User) auth.getPrincipal());
+
+            return new ResponseEntity<>(new TokenDTO(token), HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> cadastrar(@RequestBody UserDTO dto){
+        if(this.repository.findByEmail(dto.email()) != null){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        String encryptedPassword = new BCryptPasswordEncoder().encode(dto.password());
+        User novousuario = new User(dto.id(), dto.name(), dto.email(), encryptedPassword, dto.role());
+
+        this.repository.save(novousuario);
+
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
 
     @PostMapping("/")
     public ResponseEntity create(@RequestBody UserDTO dto) {
@@ -73,7 +115,7 @@ public class UserController {
     @DeleteMapping("{id}")
     public ResponseEntity Delete(@PathVariable Long id){
 
-        service.Delete(id);
+        service.delete(id);
 
         return ResponseEntity.noContent().build();
 

@@ -8,3 +8,8 @@ spring:
         url: jdbc:postgresql://localhost:5432/desafio
     jpa:
         hibernate.ddlAuto: update 
+
+api:
+    security:
+        token:
+            secret: "${JWT_SECRET:my-secret-key}"
