@@ -8,8 +8,15 @@ spring:
         url: jdbc:postgresql://localhost:5432/desafio
     jpa:
         hibernate.ddlAuto: update 
-
-api:
+    security:
+        oauth2:
+            client:
+                registration:
+                    google:
+                        client-id: 
+                        client-secret: 
+                        redirect-uri: http://localhost:8080/login/oauth2/code/google
+api:    
     security:
         token:
             secret: "${JWT_SECRET:my-secret-key}"
