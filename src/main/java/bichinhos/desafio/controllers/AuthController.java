@@ -72,15 +72,19 @@ public class AuthController {
 
     @GetMapping("/")
     public ResponseEntity<?> googleLogin(@AuthenticationPrincipal OAuth2User oAuth2User) {
-        
+
         Map<String, Object> userdetails = oAuth2User.getAttributes();
 
         String name = (String) userdetails.get("name");
         String email = (String) userdetails.get("email");
         User user = new User();
-
         user.setEmail(email);
         user.setName(name);
+        
+        if(this.repository.findByEmail(user.getEmail()) == null){
+            repository.save(user);
+        }
+        
 
         var token = tokenService.generatedToken(user);
         var res = new ResponseEntity<>(token, null, 200);

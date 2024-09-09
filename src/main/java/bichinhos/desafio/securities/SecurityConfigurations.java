@@ -38,6 +38,7 @@ public class SecurityConfigurations implements WebMvcConfigurer {
                 .anyRequest().authenticated()
                 )
                 .oauth2Login(Customizer.withDefaults())
+                
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
